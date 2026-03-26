@@ -70,6 +70,7 @@ void ASDTAIController::MoveToRandomCollectible()
     }
 }
 
+
 void ASDTAIController::MoveToPlayer()
 {
     ACharacter * playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);

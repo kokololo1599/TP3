@@ -16,6 +16,9 @@ public:
     virtual void OnCollectPowerUp() {};
     void Die();
 
+// added for fusion
+    UPROPERTY(BlueprintReadWrite)
+    bool bIsInCover = false;
 protected:
     UFUNCTION()
     virtual void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

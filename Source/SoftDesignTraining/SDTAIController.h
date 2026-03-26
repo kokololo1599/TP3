@@ -44,6 +44,9 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = AI)
     bool Landing = false;
 
+    UPROPERTY(EditAnywhere, Category = AI)
+    UBehaviorTree* BehaviorTree;
+
 protected:
 
     enum PlayerInteractionBehavior
