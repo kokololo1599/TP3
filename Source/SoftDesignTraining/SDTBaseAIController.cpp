@@ -16,7 +16,7 @@ void ASDTBaseAIController::Tick(float deltaTime)
     Super::Tick(deltaTime);
 
     UpdatePlayerInteraction(deltaTime);
-
+    /*
     if (m_ReachedTarget)
     {
         GoToBestTarget(deltaTime);
@@ -25,6 +25,7 @@ void ASDTBaseAIController::Tick(float deltaTime)
     {
         ShowNavigationPath();
     }
+    */
 }
 
 

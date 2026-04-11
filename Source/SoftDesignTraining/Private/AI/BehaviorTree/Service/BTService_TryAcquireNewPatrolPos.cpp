@@ -4,10 +4,9 @@
 #include "SoftDesignTraining/SoftDesignTraining.h"
 #include "AI/SoftDesignAIController.h"
 #include "SoftDesignTraining/SoftDesignTrainingCharacter.h"
-#include "AIBase.h"
-
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
+#include "BehaviorTree/BlackboardComponent.h" // Added for safety
 
 UBTService_TryAcquireNewPatrolPos::UBTService_TryAcquireNewPatrolPos()
 {
@@ -18,31 +17,37 @@ void UBTService_TryAcquireNewPatrolPos::TickNode(UBehaviorTreeComponent& OwnerCo
 {
     if (ASoftDesignAIController* aiController = Cast<ASoftDesignAIController>(OwnerComp.GetAIOwner()))
     {
-        if (AAIBase* aiBase = Cast<AAIBase>(aiController->GetCharacter()))
+        // Replaced AAIBase with ASoftDesignTrainingCharacter
+        if (ASoftDesignTrainingCharacter* aiCharacter = Cast<ASoftDesignTrainingCharacter>(aiController->GetCharacter()))
         {
             FVector nextPatrolDestination = FVector::ZeroVector;
 
-            //We are restarting a patrol
-            if (FVector::ZeroVector == aiBase->GetCurrentPatrolDestination())
-            {
-                //Get the next patrol pos
-                nextPatrolDestination = aiBase->GetNextPatrolDestination();
-                aiBase->SetCurrentPatrolDestination(nextPatrolDestination);
-            }
-            else if ((aiBase->GetActorLocation() - aiBase->GetNextPatrolDestination()).Size2D() < 100.f)
-            {
-                //Process new patrol point
-                aiBase->ProcessNextPatrolDestination(nextPatrolDestination);
-            }
+            /* * NOTE: The following logic is commented out because the patrol
+             * functions do not exist in ASoftDesignTrainingCharacter yet.
+             * This prevents "Undefined" or "Not Found" compilation errors.
+             */
 
-            //Write to blackboard
-            if (FVector::ZeroVector != nextPatrolDestination )
+             /*
+             // Check if we need a new destination
+             if (FVector::ZeroVector == aiCharacter->GetCurrentPatrolDestination()) // Does not exist
+             {
+                 nextPatrolDestination = aiCharacter->GetNextPatrolDestination(); // Does not exist
+                 aiCharacter->SetCurrentPatrolDestination(nextPatrolDestination); // Does not exist
+             }
+             else if ((aiCharacter->GetActorLocation() - aiCharacter->GetNextPatrolDestination()).Size2D() < 100.f)
+             {
+                 aiCharacter->ProcessNextPatrolDestination(nextPatrolDestination); // Does not exist
+             }
+             */
+            
+             // Currently returning a "null" answer (ZeroVector) as the destination doesn't exist
+            nextPatrolDestination = FVector::ZeroVector;
+
+            // Write to blackboard if a valid destination was found (currently will stay Zero)
+            if (nextPatrolDestination != FVector::ZeroVector)
             {
                 OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>(aiController->GetNextPatrolDestinationKeyID(), nextPatrolDestination);
             }
         }
     }
 }
-
-
-
