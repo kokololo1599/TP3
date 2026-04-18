@@ -2,6 +2,7 @@
 
 #include "SoftDesignTrainingMainCharacter.h"
 #include "SoftDesignTraining.h"
+#include "AI/AiAgentGroupManager.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -31,12 +32,17 @@ void ASoftDesignTrainingMainCharacter::OnBeginOverlap(UPrimitiveComponent* Overl
     if (ASoftDesignTrainingCharacter* character = Cast<ASoftDesignTrainingCharacter>(OtherActor))
     {
         if (!IsPoweredUp())
+        {
+            AiAgentGroupManager::GetInstance()->DissolvePursuitGroup();
             SetActorLocation(m_StartingPosition);
+        }
     }
 }
 
 void ASoftDesignTrainingMainCharacter::OnCollectPowerUp()
 {
+    AiAgentGroupManager::GetInstance()->DissolvePursuitGroup();
+
     m_IsPoweredUp = true;
 
     GetMesh()->SetMaterial(0, m_PoweredUpMaterial);

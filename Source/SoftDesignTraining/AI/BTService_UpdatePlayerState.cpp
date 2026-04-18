@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "SoftDesignTraining/SDTUtils.h"
+#include "AI/AiAgentGroupManager.h"
 #include "AIController.h"
 #include "DrawDebugHelpers.h"
 
@@ -22,6 +23,12 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
 
     ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
     if (!playerCharacter) return;
+
+    UBlackboardComponent* blackboard = OwnerComp.GetBlackboardComponent();
+    if (!blackboard) return;
+
+    AiAgentGroupManager* groupManager = AiAgentGroupManager::GetInstance();
+    if (!groupManager) return;
 
     FVector detectionStartLocation = selfPawn->GetActorLocation() + selfPawn->GetActorForwardVector() * DetectionCapsuleForwardStartingOffset;
     FVector detectionEndLocation = detectionStartLocation + selfPawn->GetActorForwardVector() * DetectionCapsuleHalfLength * 2;
@@ -48,20 +55,32 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
         }
     }
 
-    if (bCanSeePlayer)
+    const bool bPlayerPoweredUp = SDTUtils::IsPlayerPoweredUp(GetWorld());
+
+    if (bPlayerPoweredUp)
     {
-        newBehavior = SDTUtils::IsPlayerPoweredUp(GetWorld()) ? EPlayerInteractionBehavior::Flee : EPlayerInteractionBehavior::Chase;
-        OwnerComp.GetBlackboardComponent()->SetValueAsObject(PlayerTargetKey.SelectedKeyName, playerCharacter);
+        newBehavior = EPlayerInteractionBehavior::Flee;
+        blackboard->ClearValue(PlayerTargetKey.SelectedKeyName);
+    }
+    else if (bCanSeePlayer)
+    {
+        groupManager->JoinPursuitGroup(selfPawn);
+        newBehavior = EPlayerInteractionBehavior::Chase;
+        blackboard->SetValueAsObject(PlayerTargetKey.SelectedKeyName, playerCharacter);
+    }
+    else if (groupManager->IsAgentInPursuitGroup(selfPawn))
+    {
+        newBehavior = EPlayerInteractionBehavior::Chase;
+        blackboard->SetValueAsObject(PlayerTargetKey.SelectedKeyName, playerCharacter);
     }
     else
     {
-        // If lost LoS, you can implement your timer logic here or in a BT Decorator
-        OwnerComp.GetBlackboardComponent()->ClearValue(PlayerTargetKey.SelectedKeyName);
+        blackboard->ClearValue(PlayerTargetKey.SelectedKeyName);
     }
 
-    OwnerComp.GetBlackboardComponent()->SetValueAsEnum(StateKey.SelectedKeyName, (uint8)newBehavior);
+    blackboard->SetValueAsEnum(StateKey.SelectedKeyName, (uint8)newBehavior);
 
-    DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
+    //DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
 
 bool UBTService_UpdatePlayerState::HasLoSOnHit(const FHitResult& hit, UWorld* World)

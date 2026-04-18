@@ -1,7 +1,8 @@
 #pragma once
-#include "TargetLKPInfo.h"
-#include "AIBase.h"
+
 #include "CoreMinimal.h"
+
+class APawn;
 
 /**
  * 
@@ -12,10 +13,11 @@ public:
     static AiAgentGroupManager* GetInstance();
     static void Destroy();
 
-    void RegisterAIAgent(AAIBase* aiAgent);
-    void UnregisterAIAgent(AAIBase* aiAgent);
-
-    TargetLKPInfo GetLKPFromGroup(const FString& targetLabel, bool& targetFound);
+    void JoinPursuitGroup(APawn* aiAgent);
+    void LeavePursuitGroup(APawn* aiAgent);
+    void DissolvePursuitGroup();
+    bool IsAgentInPursuitGroup(const APawn* aiAgent) const;
+    void DrawDebugForAgent(const APawn* aiAgent) const;
 
 private:
 
@@ -23,6 +25,6 @@ private:
     AiAgentGroupManager();
     static AiAgentGroupManager* m_Instance;
 
-    TArray<AAIBase*> m_registeredAgents;
+    TArray<APawn*> m_pursuitAgents;
 
 };

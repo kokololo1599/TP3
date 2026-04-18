@@ -110,7 +110,7 @@ void ASDTAIController::PlayerInteractionLoSUpdate()
         {
             GetWorld()->GetTimerManager().ClearTimer(m_PlayerInteractionNoLosTimer);
             m_PlayerInteractionNoLosTimer.Invalidate();
-            DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), "Got LoS", GetPawn(), FColor::Red, 5.f, false);
+            //DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), "Got LoS", GetPawn(), FColor::Red, 5.f, false);
         }
     }
     else
@@ -118,7 +118,7 @@ void ASDTAIController::PlayerInteractionLoSUpdate()
         if (!GetWorld()->GetTimerManager().IsTimerActive(m_PlayerInteractionNoLosTimer))
         {
             GetWorld()->GetTimerManager().SetTimer(m_PlayerInteractionNoLosTimer, this, &ASDTAIController::OnPlayerInteractionNoLosDone, 3.f, false);
-            DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), "Lost LoS", GetPawn(), FColor::Red, 5.f, false);
+            //DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), "Lost LoS", GetPawn(), FColor::Red, 5.f, false);
         }
     }
     
@@ -127,7 +127,7 @@ void ASDTAIController::PlayerInteractionLoSUpdate()
 void ASDTAIController::OnPlayerInteractionNoLosDone()
 {
     GetWorld()->GetTimerManager().ClearTimer(m_PlayerInteractionNoLosTimer);
-    DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), "TIMER DONE", GetPawn(), FColor::Red, 5.f, false);
+    //DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), "TIMER DONE", GetPawn(), FColor::Red, 5.f, false);
 
     if (!AtJumpSegment)
     {
@@ -167,7 +167,7 @@ void ASDTAIController::MoveToBestFleeLocation()
                 bestFleeLocation = fleeLocation;
             }
 
-            DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), FString::SanitizeFloat(locationScore), fleeLocation, FColor::Red, 5.f, false);
+            //DrawDebugString(GetWorld(), FVector(0.f, 0.f, 10.f), FString::SanitizeFloat(locationScore), fleeLocation, FColor::Red, 5.f, false);
         }
     }
 
@@ -219,11 +219,11 @@ void ASDTAIController::ShowNavigationPath()
 
             for (int i = 0; i < pathPoints.Num(); ++i)
             {
-                DrawDebugSphere(GetWorld(), pathPoints[i].Location, 10.f, 8, FColor::Yellow);
+                //DrawDebugSphere(GetWorld(), pathPoints[i].Location, 10.f, 8, FColor::Yellow);
 
                 if (i != 0)
                 {
-                    DrawDebugLine(GetWorld(), pathPoints[i].Location, pathPoints[i - 1].Location, FColor::Yellow);
+                    //DrawDebugLine(GetWorld(), pathPoints[i].Location, pathPoints[i - 1].Location, FColor::Yellow);
                 }
             }
         }
@@ -278,9 +278,9 @@ void ASDTAIController::UpdatePlayerInteraction(float deltaTime)
         break;
     }
 
-    DrawDebugString(GetWorld(), FVector(0.f, 0.f, 5.f), debugString, GetPawn(), FColor::Orange, 0.f, false);
+    //DrawDebugString(GetWorld(), FVector(0.f, 0.f, 5.f), debugString, GetPawn(), FColor::Orange, 0.f, false);
 
-    DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
+    //DrawDebugCapsule(GetWorld(), detectionStartLocation + m_DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), m_DetectionCapsuleHalfLength, m_DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
 
 bool ASDTAIController::HasLoSOnHit(const FHitResult& hit)
