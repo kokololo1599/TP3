@@ -122,3 +122,10 @@ void AiAgentGroupManager::DrawDebugForAgent(const APawn* aiAgent) const
         0.f,
         false);
 }
+int32 AiAgentGroupManager::GetAgentIndex(const APawn* aiAgent) const
+{
+    if (!aiAgent) return -1;
+
+    // Find returns INDEX_NONE (-1) if not found
+    return m_pursuitAgents.Find(const_cast<APawn*>(aiAgent));
+}

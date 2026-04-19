@@ -18,6 +18,7 @@ public:
     void DissolvePursuitGroup();
     bool IsAgentInPursuitGroup(const APawn* aiAgent) const;
     void DrawDebugForAgent(const APawn* aiAgent) const;
+    int32 GetAgentIndex(const APawn* aiAgent) const;
 
 private:
 

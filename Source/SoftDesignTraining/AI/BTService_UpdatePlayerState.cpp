@@ -24,7 +24,7 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     ASDTAIController* AsdtAIController = Cast<ASDTAIController>(aiController);
 
     if (AsdtAIController->AtJumpSegment) {
-        return; // if at jump segment, do not change state
+        return; // if at jump segmen
     }
 
     ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
@@ -109,7 +109,32 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
 
     blackboard->SetValueAsObject("PlayerActor", playerCharacter);
     blackboard->SetValueAsEnum(StateKey.SelectedKeyName, (uint8)newBehavior);
-   
+    FString stateString = "Collect";
+
+    switch (newBehavior)
+    {
+    case EPlayerInteractionBehavior::Chase:
+        stateString = "Chase";
+        break;
+    case EPlayerInteractionBehavior::Flee:
+        stateString = "Flee";
+        break;
+    }
+
+    FVector pos = selfPawn->GetActorLocation() + FVector(0, 0, 120);
+
+    DrawDebugSphere(GetWorld(), pos, 20.f, 8, FColor::Red, false, 2.0f);
+
+    DrawDebugString(
+        GetWorld(),
+        pos,
+        stateString,
+        nullptr,
+        FColor::White,
+        2.0f,
+        true,
+        2.0f
+    );
     //DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
 
