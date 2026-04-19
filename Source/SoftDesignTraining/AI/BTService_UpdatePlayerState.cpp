@@ -103,7 +103,7 @@ bool bIsCurrentlyFleeing = (currentBehavior == EPlayerInteractionBehavior::Flee)
     blackboard->SetValueAsObject("PlayerActor", playerCharacter);
     blackboard->SetValueAsEnum(StateKey.SelectedKeyName, (uint8)newBehavior);
 
-    DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
+    //DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
 
 bool UBTService_UpdatePlayerState::HasLoSOnHit(const FHitResult& hit, UWorld* World)

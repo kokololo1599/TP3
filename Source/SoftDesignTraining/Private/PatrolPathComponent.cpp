@@ -62,8 +62,8 @@ void UPatrolPathComponent::TickComponent( float DeltaTime, ELevelTick TickType, 
 		{
 			FVector actorLocation = children->GetActorLocation();
 
-			DrawDebugLine(GetWorld(), actorLocation, lastPosition, FColor::Blue, false);
-			DrawDebugLine(GetWorld(), actorLocation, pathLocation, FColor::Cyan, false);
+			//DrawDebugLine(GetWorld(), actorLocation, lastPosition, FColor::Blue, false);
+			//DrawDebugLine(GetWorld(), actorLocation, pathLocation, FColor::Cyan, false);
 
 			lastPosition = actorLocation;
 		}

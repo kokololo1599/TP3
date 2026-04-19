@@ -3,6 +3,7 @@
 #include "SoftDesignTrainingCharacter.h"
 #include "SoftDesignTraining.h"
 #include "SoftDesignTrainingMainCharacter.h"
+#include "AI/AiAgentGroupManager.h"
 #include "SDTAIController.h"
 #include "SDTProjectile.h"
 #include "SDTUtils.h"
@@ -48,6 +49,15 @@ void ASoftDesignTrainingCharacter::OnBeginOverlap(UPrimitiveComponent* Overlappe
 void ASoftDesignTrainingCharacter::Die()
 {
     SetActorLocation(m_StartingPosition);
+
+    if (Cast<ASoftDesignTrainingMainCharacter>(this))
+    {
+        AiAgentGroupManager::GetInstance()->DissolvePursuitGroup();
+    }
+    else
+    {
+        AiAgentGroupManager::GetInstance()->LeavePursuitGroup(this);
+    }
 
     if (ASDTAIController* controller = Cast<ASDTAIController>(GetController()))
     {

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AIBase.h"
 #include "SoftDesignTraining/SoftDesignTraining.h"
@@ -79,6 +79,8 @@ void AAIBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     Super::EndPlay(EndPlayReason);
 
+    AiAgentGroupManager::GetInstance()->LeavePursuitGroup(this);
+
     ReactionManager* reactionManager = ReactionManager::GetInstance();
     if (reactionManager)
     {
@@ -135,7 +137,7 @@ void AAIBase::UpdateIfElseLogic(float DeltaTime)
 
     FVector actorLocation = GetActorLocation();
 
-    //Action fait chaque update selon l'état courant de l'agent
+    //Action fait chaque update selon l'ï¿½tat courant de l'agent
     if (m_IsBlind)
     {
         if (m_BlindTimeLeft > 0)
@@ -178,14 +180,14 @@ void AAIBase::UpdateIfElseLogic(float DeltaTime)
     }
     else if (m_isRetreating)
     {
-        DrawDebugSphere(GetWorld(), m_retreatDestination, 30.0f, 32, FColor::Green);
-        DrawDebugSphere(GetWorld(), actorLocation + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Green);
+        //DrawDebugSphere(GetWorld(), m_retreatDestination, 30.0f, 32, FColor::Green);
+        //DrawDebugSphere(GetWorld(), actorLocation + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Green);
 
     }
     else if (m_isInvestigatingExplosion)
     {
-        DrawDebugSphere(GetWorld(), m_lastExplosionPos, 30.0f, 32, FColor::Blue);
-        DrawDebugSphere(GetWorld(), actorLocation + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Blue);
+        //DrawDebugSphere(GetWorld(), m_lastExplosionPos, 30.0f, 32, FColor::Blue);
+        //DrawDebugSphere(GetWorld(), actorLocation + FVector(0.f, 0.f, 100.f), 15.0f, 32, FColor::Blue);
 
         //Has the agent reached the investigation point or saw the a target in the process       
     }
@@ -200,8 +202,8 @@ void AAIBase::UpdateIfElseLogic(float DeltaTime)
             SetNewMoveDestination(lkpPos);
         }
 
-        DrawDebugSphere(GetWorld(), lkpPos, 30.0f, 32, FColor::Purple);
-        DrawDebugSphere(GetWorld(), actorLocation + FVector(0.f,0.f,100.f), 15.0f, 32, FColor::Purple);
+        //DrawDebugSphere(GetWorld(), lkpPos, 30.0f, 32, FColor::Purple);
+        //DrawDebugSphere(GetWorld(), actorLocation + FVector(0.f,0.f,100.f), 15.0f, 32, FColor::Purple);
 
 
         //Has the agent reached the investigation point or saw the a target in the process or ...
@@ -272,6 +274,8 @@ void AAIBase::UpdateIfElseLogic(float DeltaTime)
 
 void AAIBase::UpdateBTLogic(float DeltaTime)
 {
+    AiAgentGroupManager::GetInstance()->DrawDebugForAgent(this);
+
     if (m_IsBlind)
     {
         if (m_BlindTimeLeft > 0)
@@ -417,7 +421,7 @@ void AAIBase::ProcessHeardBomb(const FVector& bombPos)
     //Bomb as exploded remove it's pos
     m_bombDropPos = FVector::ZeroVector;
 
-    DrawDebugSphere(GetWorld(), m_lastExplosionPos, 30.0f, 32, FColor::Blue);
+    //DrawDebugSphere(GetWorld(), m_lastExplosionPos, 30.0f, 32, FColor::Blue);
 }
 
 void AAIBase::GoToNextPatrol()

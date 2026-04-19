@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/AiAgentGroupManager.h"
-#include "SoftDesignTraining/SoftDesignTraining.h"
+#include "DrawDebugHelpers.h"
+#include "Engine/Engine.h"
+#include "GameFramework/Pawn.h"
 
-AiAgentGroupManager* AiAgentGroupManager::m_Instance;
+AiAgentGroupManager* AiAgentGroupManager::m_Instance = nullptr;
 
 AiAgentGroupManager::AiAgentGroupManager()
 {
@@ -25,20 +27,98 @@ void AiAgentGroupManager::Destroy()
     m_Instance = nullptr;
 }
 
-void AiAgentGroupManager::RegisterAIAgent(AAIBase* aiAgent)
+void AiAgentGroupManager::JoinPursuitGroup(APawn* aiAgent)
 {
-    m_registeredAgents.Add(aiAgent);
+    if (!aiAgent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("JoinPursuitGroup called with null agent."));
+        return;
+    }
+
+    const bool bWasAlreadyInGroup = m_pursuitAgents.Contains(aiAgent);
+    m_pursuitAgents.AddUnique(aiAgent);
+
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("JoinPursuitGroup called for %s. AlreadyInGroup=%s GroupSize=%d"),
+        *aiAgent->GetName(),
+        bWasAlreadyInGroup ? TEXT("true") : TEXT("false"),
+        m_pursuitAgents.Num());
+
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(
+            -1,
+            3.f,
+            FColor::Yellow,
+            FString::Printf(TEXT("JoinPursuitGroup: %s (%d)"), *aiAgent->GetName(), m_pursuitAgents.Num()));
+    }
 }
 
-void AiAgentGroupManager::UnregisterAIAgent(AAIBase* aiAgent)
+void AiAgentGroupManager::LeavePursuitGroup(APawn* aiAgent)
 {
-    m_registeredAgents.Remove(aiAgent);
+    if (!aiAgent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("LeavePursuitGroup called with null agent."));
+        return;
+    }
+
+    const bool bWasInGroup = m_pursuitAgents.Contains(aiAgent);
+    m_pursuitAgents.Remove(aiAgent);
+
+    UE_LOG(
+        LogTemp,
+        Warning,
+        TEXT("LeavePursuitGroup called for %s. WasInGroup=%s GroupSize=%d"),
+        *aiAgent->GetName(),
+        bWasInGroup ? TEXT("true") : TEXT("false"),
+        m_pursuitAgents.Num());
+
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(
+            -1,
+            3.f,
+            FColor::Cyan,
+            FString::Printf(TEXT("LeavePursuitGroup: %s (%d)"), *aiAgent->GetName(), m_pursuitAgents.Num()));
+    }
 }
 
-TargetLKPInfo AiAgentGroupManager::GetLKPFromGroup(const FString& targetLabel,bool& targetfound)
+void AiAgentGroupManager::DissolvePursuitGroup()
 {
-    int agentCount = m_registeredAgents.Num();
-    TargetLKPInfo outLKPInfo = TargetLKPInfo();
-    
-    return outLKPInfo;
+    UE_LOG(LogTemp, Warning, TEXT("DissolvePursuitGroup called. PreviousGroupSize=%d"), m_pursuitAgents.Num());
+
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(
+            -1,
+            3.f,
+            FColor::Red,
+            FString::Printf(TEXT("DissolvePursuitGroup: clearing %d agents"), m_pursuitAgents.Num()));
+    }
+
+    m_pursuitAgents.Empty();
+}
+
+bool AiAgentGroupManager::IsAgentInPursuitGroup(const APawn* aiAgent) const
+{
+    return aiAgent && m_pursuitAgents.Contains(const_cast<APawn*>(aiAgent));
+}
+
+void AiAgentGroupManager::DrawDebugForAgent(const APawn* aiAgent) const
+{
+    if (!aiAgent || !IsAgentInPursuitGroup(aiAgent))
+    {
+        return;
+    }
+
+    DrawDebugString(
+        aiAgent->GetWorld(),
+        FVector(0.f, 0.f, 140.f),
+        TEXT("IN GROUP"),
+        const_cast<APawn*>(aiAgent),
+        FColor::Yellow,
+        0.f,
+        false);
 }
