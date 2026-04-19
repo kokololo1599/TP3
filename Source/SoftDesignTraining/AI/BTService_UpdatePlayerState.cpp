@@ -6,6 +6,7 @@
 #include "SoftDesignTraining/SDTUtils.h"
 #include "AI/AiAgentGroupManager.h"
 #include "AIController.h"
+#include "SoftDesignTraining/SDTAIController.h"
 #include "DrawDebugHelpers.h"
 
 UBTService_UpdatePlayerState::UBTService_UpdatePlayerState()
@@ -17,9 +18,14 @@ UBTService_UpdatePlayerState::UBTService_UpdatePlayerState()
 void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
-    APawn* selfPawn = OwnerComp.GetAIOwner()->GetPawn();
+    AAIController* aiController = OwnerComp.GetAIOwner();
+    APawn* selfPawn = aiController->GetPawn();
     if (!selfPawn) return;
+    ASDTAIController* AsdtAIController = Cast<ASDTAIController>(aiController);
+
+    if (AsdtAIController->AtJumpSegment) {
+        return; // if at jump segment, do not change state
+    }
 
     ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
     if (!playerCharacter) return;
@@ -66,23 +72,23 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     
     if (bPlayerPoweredUp)
     {
-bool bIsCurrentlyFleeing = (currentBehavior == EPlayerInteractionBehavior::Flee);
+        bool bIsCurrentlyFleeing = (currentBehavior == EPlayerInteractionBehavior::Flee);
     
-    // 1. Only START fleeing if very close
-    if (!bIsCurrentlyFleeing && playerDistance < 550.f)
-    {
-        newBehavior = EPlayerInteractionBehavior::Flee;
-    }
-    // 2. Only STOP fleeing if very far
-    else if (bIsCurrentlyFleeing && playerDistance > 2000.f)
-    {
-        newBehavior = EPlayerInteractionBehavior::Collect;
-    }
-    // 3. Otherwise, do NOT change the state. Stay in Flee or stay in Collect.
-    else
-    {
-        newBehavior = currentBehavior;
-    }
+        // 1. Only START fleeing if very close
+        if (!bIsCurrentlyFleeing && playerDistance < 550.f)
+        {
+            newBehavior = EPlayerInteractionBehavior::Flee;
+        }
+        // 2. Only STOP fleeing if very far
+        else if (bIsCurrentlyFleeing && playerDistance > 2000.f)
+        {
+            newBehavior = EPlayerInteractionBehavior::Collect;
+        }
+        // 3. Otherwise, do NOT change the state. Stay in Flee or stay in Collect.
+        else
+        {
+            newBehavior = currentBehavior;
+        }
 
     }
     else if (bCanSeePlayer)
@@ -100,9 +106,10 @@ bool bIsCurrentlyFleeing = (currentBehavior == EPlayerInteractionBehavior::Flee)
     {
         blackboard->ClearValue(PlayerTargetKey.SelectedKeyName);
     }
+
     blackboard->SetValueAsObject("PlayerActor", playerCharacter);
     blackboard->SetValueAsEnum(StateKey.SelectedKeyName, (uint8)newBehavior);
-
+   
     //DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
 
