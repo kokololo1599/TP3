@@ -18,5 +18,11 @@ protected:
 public:
     // Expose this so you can select your "PursuitTargetLocation" vector key in the editor
     UPROPERTY(EditAnywhere, Category = "Blackboard")
-    struct FBlackboardKeySelector ChaseLocationKey;
+    FBlackboardKeySelector ChaseLocationKey;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard")
+    FBlackboardKeySelector PlayerLKPKey;
+
+    UPROPERTY(EditAnywhere, Category = "Blackboard")
+    FBlackboardKeySelector PlayerLKFKey;
 };

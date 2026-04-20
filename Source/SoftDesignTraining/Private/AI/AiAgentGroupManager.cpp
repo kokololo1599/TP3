@@ -46,7 +46,7 @@ void AiAgentGroupManager::JoinPursuitGroup(APawn* aiAgent)
         bWasAlreadyInGroup ? TEXT("true") : TEXT("false"),
         m_pursuitAgents.Num());
 
-    if (GEngine)
+    if (GEngine && false)
     {
         GEngine->AddOnScreenDebugMessage(
             -1,
@@ -116,16 +116,21 @@ void AiAgentGroupManager::DrawDebugForAgent(const APawn* aiAgent) const
     DrawDebugString(
         aiAgent->GetWorld(),
         FVector(0.f, 0.f, 140.f),
-        TEXT("IN GROUP"),
+        FString::Printf(TEXT("IN GROUP: %d"), GetAgentIndex(aiAgent)),
         const_cast<APawn*>(aiAgent),
         FColor::Yellow,
         0.f,
         false);
 }
-int32 AiAgentGroupManager::GetAgentIndex(const APawn* aiAgent) const
+int AiAgentGroupManager::GetAgentIndex(const APawn* aiAgent) const
 {
     if (!aiAgent) return -1;
 
     // Find returns INDEX_NONE (-1) if not found
     return m_pursuitAgents.Find(const_cast<APawn*>(aiAgent));
+}
+
+int AiAgentGroupManager::GetGroupSize() const
+{
+    return m_pursuitAgents.Num();
 }

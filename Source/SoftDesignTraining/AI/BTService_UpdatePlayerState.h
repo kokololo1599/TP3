@@ -24,13 +24,19 @@ public:
     FBlackboardKeySelector PlayerTargetKey;
 
     UPROPERTY(EditAnywhere, Category = "AI")
+    FBlackboardKeySelector PlayerLKPKey;
+
+    UPROPERTY(EditAnywhere, Category = "AI")
+    FBlackboardKeySelector PlayerLKFKey;
+
+    UPROPERTY(EditAnywhere, Category = "AI")
     float DetectionCapsuleForwardStartingOffset = 50.f;
 
     UPROPERTY(EditAnywhere, Category = "AI")
     float DetectionCapsuleHalfLength = 500.f;
 
     UPROPERTY(EditAnywhere, Category = "AI")
-    float DetectionCapsuleRadius = 250.f;
+    float DetectionCapsuleRadius = 500.f;
 
 private:
     bool HasLoSOnHit(const FHitResult& hit, UWorld* World);

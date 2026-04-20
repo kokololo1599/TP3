@@ -24,11 +24,13 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     ASDTAIController* AsdtAIController = Cast<ASDTAIController>(aiController);
 
     if (AsdtAIController->AtJumpSegment) {
-        return; // if at jump segmen
+        return;
     }
 
     ACharacter* playerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
     if (!playerCharacter) return;
+
+    //DrawDebugSphere(GetWorld(), playerCharacter->GetActorLocation(), 500.0f, 32, FColor::Red);
 
     UBlackboardComponent* blackboard = OwnerComp.GetBlackboardComponent();
     if (!blackboard) return;
@@ -40,12 +42,11 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     FVector detectionEndLocation = detectionStartLocation + selfPawn->GetActorForwardVector() * DetectionCapsuleHalfLength * 2;
 
     TArray<TEnumAsByte<EObjectTypeQuery>> detectionTraceObjectTypes;
-    detectionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_PLAYER)); // Assuming defined in SoftDesignTraining.h
+    detectionTraceObjectTypes.Add(UEngineTypes::ConvertToObjectType(COLLISION_PLAYER));
 
     TArray<FHitResult> allDetectionHits;
     GetWorld()->SweepMultiByObjectType(allDetectionHits, detectionStartLocation, detectionEndLocation, FQuat::Identity, detectionTraceObjectTypes, FCollisionShape::MakeSphere(DetectionCapsuleRadius));
 
-    // Determine Behavior
     EPlayerInteractionBehavior currentBehavior = (EPlayerInteractionBehavior)blackboard->GetValueAsEnum(StateKey.SelectedKeyName);
     EPlayerInteractionBehavior newBehavior = currentBehavior;
     bool bCanSeePlayer = false;
@@ -74,17 +75,14 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     {
         bool bIsCurrentlyFleeing = (currentBehavior == EPlayerInteractionBehavior::Flee);
     
-        // 1. Only START fleeing if very close
         if (!bIsCurrentlyFleeing && playerDistance < 550.f)
         {
             newBehavior = EPlayerInteractionBehavior::Flee;
         }
-        // 2. Only STOP fleeing if very far
         else if (bIsCurrentlyFleeing && playerDistance > 2000.f)
         {
             newBehavior = EPlayerInteractionBehavior::Collect;
         }
-        // 3. Otherwise, do NOT change the state. Stay in Flee or stay in Collect.
         else
         {
             newBehavior = currentBehavior;
@@ -95,6 +93,9 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     {
         groupManager->JoinPursuitGroup(selfPawn);
         newBehavior = EPlayerInteractionBehavior::Chase;
+        groupManager->PlayerLKP = playerCharacter->GetActorLocation();
+        blackboard->SetValueAsVector(PlayerLKPKey.SelectedKeyName, playerCharacter->GetActorLocation());
+        blackboard->SetValueAsVector(PlayerLKFKey.SelectedKeyName, playerCharacter->GetActorForwardVector());
         blackboard->SetValueAsObject(PlayerTargetKey.SelectedKeyName, playerCharacter);
     }
     else if (groupManager->IsAgentInPursuitGroup(selfPawn))
@@ -104,6 +105,7 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
     }
     else
     {
+        newBehavior = EPlayerInteractionBehavior::Collect;
         blackboard->ClearValue(PlayerTargetKey.SelectedKeyName);
     }
 
@@ -123,18 +125,9 @@ void UBTService_UpdatePlayerState::TickNode(UBehaviorTreeComponent& OwnerComp, u
 
     FVector pos = selfPawn->GetActorLocation() + FVector(0, 0, 120);
 
-    DrawDebugSphere(GetWorld(), pos, 20.f, 8, FColor::Red, false, 2.0f);
+    //DrawDebugSphere(GetWorld(), pos, 20.f, 8, FColor::Red, false, 2.0f);
 
-    DrawDebugString(
-        GetWorld(),
-        pos,
-        stateString,
-        nullptr,
-        FColor::White,
-        2.0f,
-        true,
-        2.0f
-    );
+    //DrawDebugString(GetWorld(), pos, stateString, nullptr, FColor::White, 2.0f, true, 2.0f);
     //DrawDebugCapsule(GetWorld(), detectionStartLocation + DetectionCapsuleHalfLength * selfPawn->GetActorForwardVector(), DetectionCapsuleHalfLength, DetectionCapsuleRadius, selfPawn->GetActorQuat() * selfPawn->GetActorUpVector().ToOrientationQuat(), FColor::Blue);
 }
 

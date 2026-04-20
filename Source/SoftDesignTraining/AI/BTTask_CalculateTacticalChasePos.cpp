@@ -18,42 +18,37 @@ EBTNodeResult::Type UBTTask_CalculateTacticalChasePos::ExecuteTask(UBehaviorTree
     UBlackboardComponent* blackboard = OwnerComp.GetBlackboardComponent();
     AiAgentGroupManager* groupManager = AiAgentGroupManager::GetInstance();
 
-    // Safety check
     if (!selfPawn || !playerCharacter || !blackboard || !groupManager)
     {
         return EBTNodeResult::Failed;
     }
 
-    const FVector playerLocation = playerCharacter->GetActorLocation();
-    FVector targetLocation = playerLocation; // Default to direct pursuit
+    const FVector prevTarget = blackboard->GetValueAsVector(ChaseLocationKey.SelectedKeyName);
+    if (!FMath::IsNearlyEqual(prevTarget.Z, -500.f, 0.1f)) {
+        if (FVector::Dist2D(prevTarget, selfPawn->GetActorLocation()) < 5.0f) {
+            blackboard->SetValueAsVector(ChaseLocationKey.SelectedKeyName, groupManager->PlayerLKP);
+            return EBTNodeResult::Succeeded;
+        }
+    }
 
-    // NOTE: You will need to implement GetAgentIndex in AiAgentGroupManager
-    // It should return the index (0, 1, 2, etc.) of this pawn in the pursuit group array.
+    const FVector playerLocation = blackboard->GetValueAsVector(PlayerLKPKey.SelectedKeyName);
+    const FVector playerForward = blackboard->GetValueAsVector(PlayerLKFKey.SelectedKeyName);
+    const FVector playerRight = playerForward.Cross(FVector(0.f, 0.f, -1.0f));
+
+
+    FVector targetLocation = playerLocation;
+
     int32 myIndex = groupManager->GetAgentIndex(selfPawn);
 
-    // Apply tactical offsets based on group index
-    if (myIndex == 1)
+    if (myIndex >= 1)
     {
-        // 1. The Interceptor: Predict where the player is going (1.5 seconds ahead)
-        targetLocation = playerLocation + (playerCharacter->GetVelocity() * 1.5f);
-    }
-    else if (myIndex == 2)
-    {
-        // 2. Right Flanker: 450 units to the player's right
-        targetLocation = playerLocation + (playerCharacter->GetActorRightVector() * 450.f);
-    }
-    else if (myIndex == 3)
-    {
-        // 3. Left Flanker: 450 units to the player's left
-        targetLocation = playerLocation - (playerCharacter->GetActorRightVector() * 450.f);
-    }
-    else if (myIndex > 3)
-    {
-        // 4. Trailer: Cut off retreat 400 units behind the player
-        targetLocation = playerLocation - (playerCharacter->GetActorForwardVector() * 400.f);
+        float angle = (myIndex * (2.0f * PI / groupManager->GetGroupSize())) + PI;
+
+        FVector offset = 1000.0f * (playerForward * FMath::Cos(angle)) + (playerRight * FMath::Sin(angle));
+
+        targetLocation = playerLocation + offset;
     }
 
-    // Project the calculated point onto the NavMesh so the AI doesn't try to run into a wall
     UNavigationSystemV1* navSys = UNavigationSystemV1::GetCurrent(GetWorld());
     if (navSys)
     {
@@ -64,12 +59,10 @@ EBTNodeResult::Type UBTTask_CalculateTacticalChasePos::ExecuteTask(UBehaviorTree
         }
         else
         {
-            // If the flank spot is off the map/inside a wall, fall back to direct chase
             targetLocation = playerLocation;
         }
     }
 
-    // Write the final vector to the Blackboard
     blackboard->SetValueAsVector(ChaseLocationKey.SelectedKeyName, targetLocation);
 
     return EBTNodeResult::Succeeded;
